@@ -119,6 +119,7 @@ def update_book(book_id):
         pass
     elif not check_data(data,required):
         return jsonify({'message': 'Data is bad!'}), 400
+    new_book = None
     for i in book.values():
         if i['book_id'] == book_id and get_jwt_identity() == i['added_by']:
             i['book_name'] = data['book_name']
