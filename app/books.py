@@ -60,7 +60,7 @@ def add_book():
     with open(os.path.join(os.path.join(dir_name,"data"),"Book_Loader.json"), 'w') as f:
         f.write(json.dumps(book))
     return jsonify({'Success': 'New book added'}), 201
-@books_bp.route('/delete_book/<int:book_id>', methods=['GET'])
+@books_bp.route('/delete_book/<int:book_id>', methods=['DELETE'])
 @jwt_required()
 def delete_book(book_id):
     if not get_jwt_identity() == book[book_id]['added_by']:
@@ -72,7 +72,7 @@ def delete_book(book_id):
             break
     if deleted_book == None:
         return jsonify({'error': 'Not found!'}), 404
-    del book[deleted_book]
+    del book[int(deleted_book)]
     with open(os.path.join(os.path.join(dir_name,"data"),'Book_Loader.json'), 'w') as f:
         f.write(json.dumps(book))
     return jsonify({'Success': 'Book deleted'}), 200
