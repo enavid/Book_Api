@@ -131,7 +131,7 @@ def update_book(book_id):
             i['genre'] = data['genre']
             i['created_at'] = data['created_at']
             i['added_at'] = datetime.now().strftime('%Y-%m-%d')
-            i['added_by'] = request.headers.get('Authorization')
+            i['added_by'] = get_jwt_identity()
             new_book = i
     if new_book is None:
         return jsonify({'message': 'Not found!'}), 404
