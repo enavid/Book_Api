@@ -47,6 +47,8 @@ def signup():
         return jsonify({'message': 'username is not string'}),400
     data['password'] = bcrypt.hashpw(data['password'].encode('utf-8'), bcrypt.gensalt(12)).decode('utf-8')
     file_name = os.path.join(os.path.join(dir_name,os.path.join('data','Users')),data['username'])+'.json'
+    if os.path.exists(file_name):
+        return jsonify({'message': 'Username already exists'}), 409
     with open(file_name, 'w') as f:
         f.write(json.dumps(data))
     return jsonify({'message': 'success'})
