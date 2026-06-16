@@ -56,7 +56,7 @@ def add_book():
     }
     if str(new_book['book_id']) in book:
         return jsonify({'message': 'edit book_id!'}), 400
-    book[new_book['book_id']] = new_book
+    book[str(new_book['book_id'])] = new_book
     with open(os.path.join(os.path.join(dir_name,"data"),"Book_Loader.json"), 'w') as f:
         f.write(json.dumps(book))
     return jsonify({'Success': 'New book added'}), 201
