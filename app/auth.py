@@ -7,6 +7,7 @@ import logging
 from flask_jwt_extended import create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import datetime
 from pathlib import Path
+import re
 
 file = Path(__file__).resolve()
 dir_name = file.parent.parent
@@ -38,8 +39,8 @@ def signup():
         return jsonify({'message': 'data is bad'}), 400
     if len(data['username']) < 8:
         return jsonify({'message': 'username is too short'}),400
-    if '\\' in data['username'] or '\'' in data['username']:
-        return jsonify({'message': 'username cannot write \\,\''}),400
+    if not re.match(r'^[a-zA-Z0-9_]+$', data['username']):
+        return jsonify({'message': 'Username can only contain letters, numbers, and underscores'}), 400
     if not isinstance(data['password'], str):
         return jsonify({'message': 'password is not string'}),400
     if not isinstance(data['username'], str):
