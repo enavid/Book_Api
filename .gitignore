@@ -5,11 +5,11 @@ __pycache__/
 
 # Virtual environments
 venv/
-.env/
+.env
 .venv/
 env/
 ENV/
-.env
+
 
 # Distribution / packaging
 build/
