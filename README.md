@@ -1,230 +1,277 @@
-# 📚 Book API
+# Book API
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
-![Flask](https://img.shields.io/badge/Flask-3.x-black)
+![Flask](https://img.shields.io/badge/Flask-2.x-black)
 ![JWT](https://img.shields.io/badge/Auth-JWT-green)
 ![License](https://img.shields.io/badge/License-MIT-orange)
 
-A simple yet secure REST API built with Flask for managing books and users using JWT Authentication.
+A REST API built with Flask for managing a book collection. Supports user authentication via JWT, full CRUD operations on books, and file-based storage.
 
 ---
 
-## ✨ Features
+## Table of Contents
 
-* 🔐 User Registration
-* 🔑 JWT Authentication
-* ♻️ Refresh Token Support
-* 📖 Add New Books
-* 📚 Get All Books (Pagination)
-* ✏️ Update Books
-* 🗑 Delete Books
-* 🔍 Search Books
-* 🔒 Protected Routes
-* 📝 Logging System
-* 💾 JSON File Storage
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [Running the Server](#running-the-server)
+- [Running Tests](#running-tests)
+- [API Reference](#api-reference)
+- [Security](#security)
+- [Technologies](#technologies)
 
 ---
 
-## 📂 Project Structure
+## Features
 
-```text
-book_api/
-│
+- User signup and login with password hashing
+- JWT access token + refresh token authentication
+- Add, update, delete, and search books
+- Pagination on book listing
+- Per-user ownership — only the book owner can edit or delete
+- File-based JSON storage
+- Structured logging
+
+---
+
+## Project Structure
+
+```
+Book_Api/
 ├── app/
-│   ├── auth.py
-│   ├── books.py
-│   ├── storage.py
-│   └── __init__.py
-│
+│   ├── __init__.py
+│   ├── auth.py          # signup, login, refresh token
+│   └── books.py         # book CRUD and search
 ├── data/
-│   ├── Book_Loader.json
-│   ├── Keys.json
-│   └── Users/
-│
+│   ├── Book_Loader.json # book storage
+│   └── Users/           # one JSON file per user
+├── tests/
+│   ├── conftest.py
+│   ├── unit/
+│   │   └── test_check_data.py
+│   └── integration/
+│       ├── test_auth.py
+│       └── test_books.py
+├── check_data.py
 ├── main.py
+├── Makefile
 ├── requirements.txt
-├── app.log
-└── README.md
+└── .env.example
 ```
 
 ---
 
-# 🚀 Installation
+## Getting Started
 
-## 1. Clone Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/Mohammadreza-46/book_api.git
-cd book_api
+cd Book_Api
 ```
 
-## 2. Create Virtual Environment
-
-### Linux / Mac
+### 2. Set up environment variables
 
 ```bash
-python -m venv venv
-source venv/bin/activate
+cp .env.example .env
 ```
 
-### Windows
+Edit `.env` and set a strong secret key:
 
-```powershell
-python -m venv venv
-venv\Scripts\activate
+```
+JWT_SECRET_KEY=your-long-random-secret-key-here
 ```
 
----
-
-## 3. Install Dependencies
+### 3. Install dependencies and create virtualenv
 
 ```bash
+make setup
+```
+
+Or manually:
+
+```bash
+python3 -m venv venv
+source venv/bin/activate      # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
----
-
-## 4. Run Project
+### 4. Create required directories
 
 ```bash
-python main.py
+mkdir -p data/Users
 ```
 
-Server:
+---
 
-```text
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `JWT_SECRET_KEY` | Yes | Secret key used to sign JWT tokens. Must be long and random. |
+
+---
+
+## Running the Server
+
+```bash
+make run
+```
+
+Or manually:
+
+```bash
+JWT_SECRET_KEY=your-secret python3 main.py
+```
+
+Server runs at:
+
+```
 http://localhost:5000
 ```
 
 ---
 
-# 🔐 Authentication
+## Running Tests
 
-This API uses JWT Access Token and Refresh Token.
-
-After login you will receive:
-
-```json
-{
-  "token": "ACCESS_TOKEN",
-  "refresh_token": "REFRESH_TOKEN"
-}
-```
-
-Use token in headers:
-
-```http
-Authorization: Bearer YOUR_ACCESS_TOKEN
+```bash
+make check          # run all tests
+make test-unit      # unit tests only
+make test-integration  # integration tests only
 ```
 
 ---
 
-# 📑 API Endpoints
+## API Reference
+
+### Authentication
+
+All book endpoints require a valid JWT access token in the `Authorization` header:
+
+```
+Authorization: Bearer <access_token>
+```
 
 ---
 
-## Signup
+### Signup
 
-### Request
-
-```http
+```
 POST /signup
 ```
 
-### Body
+**Body**
 
 ```json
 {
-  "username": "testuser",
-  "password": "12345678"
+  "username": "myusername",
+  "password": "mypassword"
 }
 ```
 
-### Response
+**Rules**
+- `username`: minimum 8 characters, only letters, numbers, and underscores
+- `password`: string
 
-```json
-{
-  "message": "success"
-}
-```
+**Responses**
+
+| Status | Description |
+|--------|-------------|
+| `200` | User created successfully |
+| `400` | Validation failed (short username, invalid chars, wrong types) |
+| `409` | Username already exists |
 
 ---
 
-## Login
+### Login
 
-### Request
-
-```http
+```
 POST /login
 ```
 
-### Body
+**Body**
 
 ```json
 {
-  "username": "testuser",
-  "password": "12345678"
+  "username": "myusername",
+  "password": "mypassword"
 }
 ```
 
-### Response
+**Response `200`**
 
 ```json
 {
   "message": "success",
-  "token": "...",
-  "refresh_token": "..."
+  "token": "<access_token>",
+  "refresh_token": "<refresh_token>"
 }
 ```
 
+| Status | Description |
+|--------|-------------|
+| `200` | Login successful |
+| `400` | Wrong credentials or missing fields |
+
 ---
 
-## Refresh Token
+### Refresh Token
 
-### Request
-
-```http
+```
 POST /refresh_token
 ```
 
-### Header
+**Header**
 
-```http
-Authorization: Bearer REFRESH_TOKEN
+```
+Authorization: Bearer <refresh_token>
 ```
 
-### Response
+**Response `200`**
 
 ```json
 {
-  "token": "NEW_ACCESS_TOKEN"
+  "token": "<new_access_token>"
 }
 ```
 
+| Status | Description |
+|--------|-------------|
+| `200` | New access token issued |
+| `401` | Invalid or expired refresh token |
+
 ---
 
-# 📚 Book Endpoints
+### Get All Books
 
-All book routes require authentication.
-
----
-
-## Get All Books
-
-### Request
-
-```http
+```
 GET /get_all_book?page=1&per_page=10
 ```
 
-### Response
+**Query Parameters**
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `page` | `1` | Page number |
+| `per_page` | `10` | Items per page |
+
+**Response `200`**
 
 ```json
 {
   "book": [
     {
       "book_id": 1,
-      "book_name": "Flask Guide"
+      "book_name": "Clean Code",
+      "writer": "Robert C. Martin",
+      "genre": "Programming",
+      "published_year": 2008,
+      "rating": 5,
+      "book_content": "...",
+      "created_at": "2024-01-01",
+      "added_at": "2025-06-01",
+      "added_by": "myusername"
     }
   ]
 }
@@ -232,30 +279,71 @@ GET /get_all_book?page=1&per_page=10
 
 ---
 
-## Add Book
+### Get Book by ID
 
-### Request
-
-```http
-POST /add_book
+```
+GET /get_book/<book_id>
 ```
 
-### Body
+**Response `200`**
 
 ```json
 {
-  "book_name": "Flask Guide",
-  "book_content": "Learning Flask",
   "book_id": 1,
-  "writer": "John Doe",
-  "published_year": 2025,
-  "rating": 5,
+  "book_name": "Clean Code",
+  "writer": "Robert C. Martin",
   "genre": "Programming",
-  "created_at": "2025-01-01"
+  "published_year": 2008,
+  "rating": 5,
+  "book_content": "...",
+  "created_at": "2024-01-01",
+  "added_at": "2025-06-01",
+  "added_by": "myusername"
 }
 ```
 
-### Response
+| Status | Description |
+|--------|-------------|
+| `200` | Book found |
+| `404` | Book not found |
+
+---
+
+### Add Book
+
+```
+POST /add_book
+```
+
+**Body**
+
+```json
+{
+  "book_name": "Clean Code",
+  "book_content": "A handbook of agile software craftsmanship.",
+  "book_id": 1,
+  "writer": "Robert C. Martin",
+  "published_year": 2008,
+  "rating": 5,
+  "genre": "Programming",
+  "created_at": "2024-01-01"
+}
+```
+
+**Field Types**
+
+| Field | Type |
+|-------|------|
+| `book_name` | string |
+| `book_content` | string |
+| `book_id` | integer |
+| `writer` | string |
+| `published_year` | integer |
+| `rating` | integer |
+| `genre` | string |
+| `created_at` | string |
+
+**Response `201`**
 
 ```json
 {
@@ -263,35 +351,46 @@ POST /add_book
 }
 ```
 
+| Status | Description |
+|--------|-------------|
+| `201` | Book added |
+| `400` | Validation failed or `book_id` already exists |
+
 ---
 
-## Update Book
+### Update Book
 
-### Request
-
-```http
+```
 POST /update_book/<book_id>
 ```
 
-### Response
+Requires the same body fields as Add Book. Only the owner of the book can update it.
+
+**Response `200`**
 
 ```json
 {
-  "message": "Book updated"
+  "Success": "Book updated"
 }
 ```
 
+| Status | Description |
+|--------|-------------|
+| `200` | Book updated |
+| `400` | Validation failed |
+| `404` | Book not found or user is not the owner |
+
 ---
 
-## Delete Book
+### Delete Book
 
-### Request
-
-```http
-GET /delete_book/<book_id>
+```
+DELETE /delete_book/<book_id>
 ```
 
-### Response
+Only the owner of the book can delete it.
+
+**Response `200`**
 
 ```json
 {
@@ -299,125 +398,81 @@ GET /delete_book/<book_id>
 }
 ```
 
+| Status | Description |
+|--------|-------------|
+| `200` | Book deleted |
+| `404` | Book not found or user is not the owner |
+
 ---
 
-## Search Book
+### Search Books
 
-### Request
-
-```http
+```
 POST /search
 ```
 
-### Body
+Provide at least one of the following fields:
+
+**Body**
 
 ```json
 {
-  "book_name": "Flask"
+  "book_name": "Clean"
 }
 ```
 
-### Response
+```json
+{
+  "genre": "Programming"
+}
+```
+
+```json
+{
+  "writer": "Martin"
+}
+```
+
+Search is case-insensitive and matches partial strings.
+
+**Response `200`**
 
 ```json
 [
   {
     "book_id": 1,
-    "book_name": "Flask Guide"
+    "book_name": "Clean Code",
+    "writer": "Robert C. Martin"
   }
 ]
 ```
 
----
-
-# 🔒 Security
-
-Passwords are stored using:
-
-```python
-bcrypt
-```
-
-Authentication uses:
-
-```python
-Flask-JWT-Extended
-```
-
-Access Token Lifetime:
-
-```text
-1 Hour
-```
-
-Refresh Token Lifetime:
-
-```text
-30 Days
-```
+| Status | Description |
+|--------|-------------|
+| `200` | Results list (empty array if nothing found) |
+| `400` | No search field provided |
 
 ---
 
-# 🧪 Example Using cURL
+## Security
 
-## Login
-
-```bash
-curl -X POST http://localhost:5000/login \
--H "Content-Type: application/json" \
--d '{
-    "username":"testuser",
-    "password":"12345678"
-}'
-```
+| Mechanism | Detail |
+|-----------|--------|
+| Password hashing | `bcrypt` with cost factor 12 |
+| Authentication | JWT via `Flask-JWT-Extended` |
+| Access token lifetime | 1 hour |
+| Refresh token lifetime | 30 days |
+| Username validation | Alphanumeric and underscores only — blocks path traversal |
+| Secret key | Loaded from environment variable — never hardcoded |
 
 ---
 
-## Add Book
+## Technologies
 
-```bash
-curl -X POST http://localhost:5000/add_book \
--H "Authorization: Bearer TOKEN" \
--H "Content-Type: application/json" \
--d '{
-    "book_name":"Flask Guide",
-    "book_content":"Learn Flask",
-    "book_id":1,
-    "writer":"John",
-    "published_year":2025,
-    "rating":5,
-    "genre":"Programming",
-    "created_at":"2025-01-01"
-}'
-```
-
----
-
-# 🛠 Technologies
-
-* Python
-* Flask
-* Flask-JWT-Extended
-* bcrypt
-* JSON Storage
-* Logging
-
----
-
-# 📈 Future Improvements
-
-* Swagger / OpenAPI Documentation
-* PostgreSQL Support
-* SQLAlchemy ORM
-* Docker Support
-* Role-Based Access Control (RBAC)
-* Unit Tests
-* CI/CD Pipeline
-
----
-
-# 👨‍💻 Author
-
-Developed with ❤️ using Flask.
-
-If you found this project useful, consider giving it a ⭐ on GitHub.
+| Library | Purpose |
+|---------|---------|
+| Flask | Web framework |
+| Flask-JWT-Extended | JWT authentication |
+| bcrypt | Password hashing |
+| pytest | Testing |
+| requests | HTTP client for integration tests |
