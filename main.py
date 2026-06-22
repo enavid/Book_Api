@@ -3,6 +3,7 @@ from app import books
 from app import auth
 from flask_jwt_extended import JWTManager
 import os
+import app.check_data
 
 app = Flask(__name__)
 books_bp = books.books_bp
