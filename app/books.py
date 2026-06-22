@@ -6,6 +6,8 @@ import check_data
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pathlib import Path
 
+def is_owner(book_entry, username):
+    return book_entry.get('added_by') == username
 def error_response(message, status_code):
     return jsonify({'message': message}), status_code
 dir_name = Path(__file__).resolve().parent.parent
@@ -72,7 +74,7 @@ def add_book():
 @books_bp.route('/delete_book/<int:book_id>', methods=['DELETE'])
 @jwt_required()
 def delete_book(book_id):
-    if not get_jwt_identity() == book[book_id]['added_by']:
+    if not is_owner(book[str(book_id)],get_jwt_identity()):
         return error_response('you are not authorized!', 401)
     deleted_book = None
     for i in book.values():
@@ -127,7 +129,7 @@ def update_book(book_id):
         return error_response('The data content not has all the required fields!', 400)
     new_book = None
     for i in book.values():
-        if i['book_id'] == book_id and get_jwt_identity() == i['added_by']:
+        if i['book_id'] == book_id and is_owner(i,get_jwt_identity()):
             i['book_name'] = data['book_name']
             i['book_content'] = data['book_content']
             i['book_id'] = book_id
