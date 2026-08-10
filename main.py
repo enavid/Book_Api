@@ -9,6 +9,7 @@ from app.check_data import check_data, check_data_nl
 from app.extensions import db
 from flask_migrate import Migrate
 from app import models
+from flask_cors import CORS
 
 # Load variables from a local .env file (next to this file) into the
 # environment. This lets JWT_SECRET_KEY (and any other config) be set once in
@@ -49,7 +50,7 @@ if not secret or len(secret) < 32:
         'Linux/macOS: export JWT_SECRET_KEY=...).'
     )
 app.config['JWT_SECRET_KEY'] = secret
-
+CORS(app)
 app.register_blueprint(books_bp)
 app.register_blueprint(auth_bp)
 if __name__ == '__main__':
