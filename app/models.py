@@ -16,6 +16,9 @@ class User(db.Model):
         back_populates="owner", cascade="all, delete-orphan"
     )
 
+    def summary(self) -> dict:
+        return {"username": self.username, "book_count": len(self.books)}
+
 
 class Book(db.Model):
     __tablename__ = "books"

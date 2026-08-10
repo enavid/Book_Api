@@ -1,15 +1,14 @@
 from flask import Blueprint, request, jsonify
-import os
 import bcrypt
-import json
 from app.check_data import check_data
 import logging
 from flask_jwt_extended import create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import datetime
 from pathlib import Path
 import re
-from app.extensions import db
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import User
+from app.extensions import db
 
 def error_response(message, status_code):
     return jsonify({'message': message}), status_code
@@ -82,3 +81,10 @@ def refresh_token():
     username = get_jwt_identity()
     new_token = make_token(username)
     return jsonify({'token': new_token}), 200
+@auth_bp.route('/me', methods=['GET'])
+@jwt_required()
+def me():
+    user = db.session.scalar(db.select(User).filter_by(username=get_jwt_identity()))
+    if user is None:
+        return error_response('user not found', 404)
+    return jsonify(user.summary()), 200

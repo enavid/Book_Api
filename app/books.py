@@ -1,6 +1,5 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
-import os
 from app.check_data import check_data,check_data_nl
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pathlib import Path
