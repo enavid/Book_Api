@@ -180,3 +180,22 @@ def get_book(book_id):
     if book_row is None:
         return error_response('book_id not found!', 404)
     return jsonify(book_row.to_dict()), 200
+@books_bp.route('/my_books', methods=['GET'])
+@jwt_required()
+def my_books():
+    page = max(request.args.get('page', 1, type=int), 1)
+    per_page = max(request.args.get('per_page', 10, type=int), 0)
+
+    query = (
+        db.select(Book)
+        .join(User, Book.owner_id == User.id)
+        .filter(User.username == get_jwt_identity())
+        .order_by(Book.book_id)
+    )
+    pagination = db.paginate(query, page=page, per_page=per_page or 1, error_out=False)
+    meta = pagination_meta(pagination)
+
+    if per_page == 0:
+        meta['per_page'] = 0
+        return jsonify({'book': [], 'pagination': meta}), 200
+    return jsonify({'book': [b.to_dict() for b in pagination.items], 'pagination': meta}), 200
