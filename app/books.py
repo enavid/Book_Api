@@ -1,15 +1,22 @@
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 import os
-import json
 from app.check_data import check_data,check_data_nl
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from pathlib import Path
 import logging
 from app.models import User, Book
 from app.extensions import db
+
 logger = logging.getLogger(__name__)
 
+def pagination_meta(pagination):
+    return {
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "total": pagination.total,
+        "total_pages": pagination.pages,
+    }
 def is_owner(book_entry, username):
     return book_entry.get('added_by') == username
 def error_response(message, status_code):
@@ -19,19 +26,25 @@ dir_name = Path(__file__).resolve().parent.parent
 books_bp = Blueprint('books', __name__)
 
 
+@books_bp.route('/get_all_book?page=<int>&per_page=<int>', methods=['GET'])
+@jwt_required()
 @books_bp.route('/get_all_book', methods=['GET'])
 @jwt_required()
 def get_all_book():
     page = max(request.args.get('page', 1, type=int), 1)
     per_page = max(request.args.get('per_page', 10, type=int), 0)
-    # An explicit per_page=0 (or negative) means "zero items per page": return an
-    # empty page instead of silently falling back to the default and handing back
-    # a full page of results the client did not ask for.
-    if per_page == 0:
-        return jsonify({'book': []}), 200
+
     query = db.select(Book)
-    pagination = db.paginate(query, page=page, per_page=per_page, error_out=False)
-    return jsonify({'book': [b.to_dict() for b in pagination.items]}), 200
+    pagination = db.paginate(query, page=page, per_page=per_page or 1, error_out=False)
+    meta = pagination_meta(pagination)
+
+    if per_page == 0:
+        meta['per_page'] = 0
+        return jsonify({'book': [], 'pagination': meta}), 200
+
+    return jsonify(
+        {'book': [b.to_dict() for b in pagination.items], 'pagination': meta}
+    ), 200
 @books_bp.route('/add_book', methods=['POST'])
 @jwt_required()
 def add_book():
