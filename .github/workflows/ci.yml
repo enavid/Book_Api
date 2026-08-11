@@ -1,62 +1,49 @@
 name: CI
 
-# A step-by-step pipeline. The three stages run in order and each one gates the
-# next via `needs:`, so you get the cheapest feedback first:
-#
-#     lint  ->  unit  ->  integration
-#
-# If lint fails, the unit and integration stages are skipped; if unit fails,
-# integration is skipped. This is the same order as `make test`.
-#
-# Every stage runs on BOTH Linux and Windows (matrix), so the project stays
-# provably cross-platform.
-
 on:
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
+# Cancel an in-progress run when a newer commit is pushed to the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  PYTHON_VERSION: "3.12"
+
 jobs:
-  # -------- Stage 1: lint (code style / standards) --------
+  # Stage 1: lint. Fast, OS-independent, so it runs once.
   lint:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-          cache-dependency-path: requirements.txt
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Ruff lint
-        run: ruff check .
+      - run: pip install -r requirements.txt
+      - run: ruff check .
 
-  # -------- Stage 2: unit tests (in-process, no server) --------
+  # Stage 2: unit tests. In-process, no server, so one runner is enough.
   unit:
     needs: lint
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-          cache-dependency-path: requirements.txt
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Unit tests
-        run: pytest tests/unit/ -v
+      - run: pip install -r requirements.txt
+      - run: pytest tests/unit -v
 
-  # -------- Stage 3: integration tests (spins up a real server) --------
+  # Stage 3: integration tests. These spin up a real server, so they run on both
+  # Linux and Windows to prove the project is cross-platform.
   integration:
     needs: unit
     strategy:
@@ -65,16 +52,12 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     env:
-      # The integration server needs a JWT secret of at least 32 chars.
       JWT_SECRET_KEY: ci-integration-secret-key-at-least-32-characters
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ env.PYTHON_VERSION }}
           cache: pip
-          cache-dependency-path: requirements.txt
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-      - name: Integration tests
-        run: pytest tests/integration/ -v --tb=short
+      - run: pip install -r requirements.txt
+      - run: pytest tests/integration -v --tb=short
