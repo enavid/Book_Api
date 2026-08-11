@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel an in-progress run when a newer commit is pushed to the same ref.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# The app is deployed as a Linux Docker container, so CI runs only on Linux and
+# pins the same Python version the image will use. There is no Windows job: the
+# runtime target is the container, not a developer's OS.
+env:
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  # Stage 1: lint.
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: ruff check .
+
+  # Stage 2: unit tests (in-process, no server).
+  unit:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pytest tests/unit -v
+
+  # Stage 3: integration tests (spin up a real server).
+  integration:
+    needs: unit
+    runs-on: ubuntu-latest
+    env:
+      JWT_SECRET_KEY: ci-integration-secret-key-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: pytest tests/integration -v --tb=short

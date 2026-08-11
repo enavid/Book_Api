@@ -15,12 +15,14 @@ ifeq ($(OS),Windows_NT)
     PY     := $(VENV)\Scripts\python.exe
     PIP    := $(VENV)\Scripts\pip.exe
     PYTEST := $(VENV)\Scripts\pytest.exe
+    RUFF   := $(VENV)\Scripts\ruff.exe
     STOP   := -taskkill /F /IM python.exe /T
 else
     PYTHON := python3
     PY     := $(VENV)/bin/python
     PIP    := $(VENV)/bin/pip
     PYTEST := $(VENV)/bin/pytest
+    RUFF   := $(VENV)/bin/ruff
     STOP   := -pkill -f 'python.*main.py'
 endif
 
@@ -28,10 +30,10 @@ DEV_SECRET = dev-only-secret-do-not-use-in-production-please
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup run stop test test-unit test-integration check clean
+.PHONY: help setup run stop test test-unit test-integration lint lint-fix check clean
 
 help:
-	@$(PYTHON) -c "print('\n  make setup             Create virtualenv and install all dependencies\n  make run               Start the API server (dev mode)\n  make stop              Stop the running API server\n  make test              Run all tests (unit + integration)\n  make test-unit         Run unit tests only\n  make test-integration  Run integration tests only\n  make check             Alias for make test\n  make clean             Remove cache files and logs\n')"
+	@$(PYTHON) -c "print('\n  make setup             Create virtualenv and install all dependencies\n  make run               Start the API server (dev mode)\n  make stop              Stop the running API server\n  make test              Run the full pipeline: lint -> unit -> integration\n  make lint              Check code style with ruff\n  make lint-fix          Auto-fix what ruff can\n  make test-unit         Run unit tests only\n  make test-integration  Run integration tests only\n  make check             Alias for make test\n  make clean             Remove cache files and logs\n')"
 
 setup:
 	$(PYTHON) -m venv $(VENV)
@@ -47,7 +49,19 @@ stop:
 
 check: test
 
-test: test-unit test-integration
+# The pipeline order matters: lint first (fast, no server), then the in-process
+# unit tests, then the slower integration tests that spin up a real server. A
+# failure at any stage stops the ones after it, so you get the cheapest feedback
+# first — the same order the CI pipeline runs (.github/workflows/ci.yml).
+test: lint test-unit test-integration
+
+lint:
+	@$(PYTHON) -c "print('========== Lint (ruff) ==========')"
+	$(RUFF) check .
+
+# Convenience: auto-fix what ruff can (import order, unused imports, ...).
+lint-fix:
+	$(RUFF) check . --fix
 
 test-unit:
 	@$(PYTHON) -c "print('========== Unit Tests ==========')"

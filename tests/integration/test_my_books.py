@@ -1,32 +1,15 @@
-"""
-Integration tests for GET /my_books (new endpoint).
-
-/my_books returns ONLY the books owned by the currently authenticated user,
-paginated exactly like /get_all_book. It is the "My Library" feed the UI needs:
-/get_all_book returns every user's books and cannot be used for that.
-
-Response shape (200):
-
-    {
-      "book": [ {book...}, ... ],           # only the caller's books
-      "pagination": {"page", "per_page", "total", "total_pages"}
-    }
-
-HTTP-only tests (requests against the conftest server) -> OS-independent, so
-they run identically on Windows.
-
-NOTE (TDD): expected to FAIL until GET /my_books is implemented.
-"""
+"""Integration tests for GET /my_books: only the caller's books, paginated. TDD: red until implemented."""
 import math
 
 import requests
+
 from tests.conftest import (
     BASE_URL,
-    unique_user,
-    unique_book_id,
-    register_and_login,
     auth_headers,
     make_book,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
 

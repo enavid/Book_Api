@@ -1,6 +1,6 @@
-import pytest
 import requests
-from tests.conftest import BASE_URL, unique_user, register, login, register_and_login, auth_headers
+
+from tests.conftest import BASE_URL, auth_headers, login, register, register_and_login, unique_user
 
 
 class TestSignup:
@@ -79,11 +79,7 @@ class TestSignup:
         r = requests.post(f"{BASE_URL}/signup", json={"username": unique_user(), "password": None})
         assert r.status_code == 400
 
-    # NOTE: the old test_password_is_stored_hashed_not_plaintext was removed. It
-    # read data/Users/<username>.json — the JSON user file that the database
-    # migration deliberately dropped. The DB-based equivalent lives in
-    # tests/integration/test_database.py::TestUserPersistence
-    # ::test_password_is_stored_as_bcrypt_hash_in_db.
+    # NOTE: old test_password_is_stored_hashed_not_plaintext removed (read JSON files); DB equivalent in test_database.py::TestUserPersistence.
 
     def test_username_with_underscores_is_accepted(self):
         r = register("valid_user_1")

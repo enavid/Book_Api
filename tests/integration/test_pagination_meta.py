@@ -1,32 +1,15 @@
-"""
-Integration tests for the pagination metadata added to GET /get_all_book.
-
-The endpoint keeps its existing "book" list (backward-compatible) and now ALSO
-returns a "pagination" object so the UI can render page controls:
-
-    {
-      "book": [...],
-      "pagination": {"page", "per_page", "total", "total_pages"}
-    }
-
-/get_all_book returns EVERY user's books and all tests share one database, so
-these tests assert structure and internal consistency (e.g. total_pages derived
-from total and per_page) rather than absolute global counts.
-
-HTTP-only -> Windows-safe.
-
-NOTE (TDD): expected to FAIL until the "pagination" object is added.
-"""
+"""Integration tests for the pagination metadata added to GET /get_all_book. TDD: red until implemented."""
 import math
 
 import requests
+
 from tests.conftest import (
     BASE_URL,
-    unique_user,
-    unique_book_id,
-    register_and_login,
     auth_headers,
     make_book,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
 

@@ -1,14 +1,16 @@
-from flask import Blueprint, request, jsonify
-import bcrypt
-from app.check_data import check_data
-import logging
-from flask_jwt_extended import create_access_token, create_refresh_token,jwt_required,get_jwt_identity
 import datetime
-from pathlib import Path
+import logging
 import re
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.models import User
+from pathlib import Path
+
+import bcrypt
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity, jwt_required
+
+from app.check_data import check_data
 from app.extensions import db
+from app.models import User
+
 
 def error_response(message, status_code):
     return jsonify({'message': message}), status_code

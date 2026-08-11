@@ -1,14 +1,4 @@
-"""
-Infrastructure tests for the database mechanism (issues #40, #42, #45, #47).
-
-Unlike the other integration tests, these do NOT talk to the running server —
-they spawn short-lived subprocesses to check the *plumbing* around the database:
-the migration, the connection-string override, and the data-import script.
-
-Several tests here are EXPECTED TO FAIL right now; each failure pins an open
-issue. The reasons are documented per-test and summarised in
-docs/ISSUE_STATUS_FA.txt.
-"""
+"""Infrastructure tests for the DB plumbing (migration, DATABASE_URL override, import script) via subprocesses; some are TDD-red."""
 import os
 import sqlite3
 import subprocess
@@ -16,15 +6,10 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
-
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 JWT = "infra-test-secret-key-very-long-and-secure-000"
 
-# The env-var name main.py currently reads for the DB URL. It is a garbage,
-# URL-encoded string ("kx%40jj5%2Fg") instead of the intended "DATABASE_URL"
-# that issues #46 and #47 rely on — that mismatch is exactly what
-# test_database_url_env_var_is_honored exposes.
+# The garbage env-var name main.py once read for the DB URL instead of "DATABASE_URL" (issues #46/#47); test_database_url_env_var_is_honored exposes the mismatch.
 CURRENT_DB_ENV_KEY = "kx%40jj5%2Fg"
 
 
@@ -60,16 +45,10 @@ def _sqlite_tables(db_path):
 
 
 class TestDatabaseUrlOverride:
-    """
-    Issue #40 / #47: the DB connection string must be overridable via the
-    DATABASE_URL environment variable, so tests and production (PostgreSQL) can
-    point the same code at a different database.
-    """
+    """Issue #40/#47: the DB connection string must be overridable via the DATABASE_URL env var."""
 
     def test_database_url_env_var_is_honored(self):
-        # EXPECTED TO FAIL (open bug): main.py reads os.environ.get('kx%40jj5%2Fg')
-        # instead of 'DATABASE_URL', so setting DATABASE_URL has no effect and the
-        # app silently falls back to the default data/app.db.
+        # EXPECTED TO FAIL (open bug): main.py read os.environ.get('kx%40jj5%2Fg') instead of 'DATABASE_URL', so DATABASE_URL was ignored.
         custom = _fresh_db_path()
         code = (
             "import main;"
@@ -93,11 +72,7 @@ class TestDatabaseUrlOverride:
 
 
 class TestMigrationsBuildSchema:
-    """
-    Issue #42: `flask db upgrade` must build the whole schema from an empty
-    database. The single migration only does batch_alter_table/create_index and
-    never create_table, so on a fresh DB it raises NoSuchTableError: books.
-    """
+    """Issue #42: flask db upgrade must build the whole schema from an empty DB (the migration must create_table, not only alter)."""
 
     def test_fresh_upgrade_creates_users_and_books_tables(self):
         # EXPECTED TO FAIL (open bug #42): the migration cannot create the tables
@@ -126,10 +101,7 @@ class TestMigrationsBuildSchema:
 
 
 class TestJsonImportScript:
-    """
-    Issue #45: a scripts/import_json_to_db.py must exist to move legacy JSON
-    data (data/Book_Loader.json, data/Users/*.json) into the database.
-    """
+    """Issue #45: scripts/import_json_to_db.py must move legacy JSON data into the database."""
 
     def test_import_script_exists(self):
         # EXPECTED TO FAIL (open bug #45): the script was never written; the

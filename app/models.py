@@ -1,7 +1,9 @@
 # app/models.py
 from datetime import date
-from sqlalchemy import String, Text, ForeignKey
+
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from app.extensions import db
 
 

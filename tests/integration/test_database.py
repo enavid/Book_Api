@@ -1,32 +1,23 @@
-"""
-Integration tests that verify book and user data is stored in the DATABASE
-(issues #43 and #44), not in the old JSON files — and that the test suite runs
-against an isolated test database (issue #46).
-
-These run against the live server started by tests/conftest.py. They then open
-the SQLite database file directly to confirm rows really landed in the tables.
-"""
+"""Integration tests that users/books persist in the DB (not JSON) against an isolated test DB (issues #43/#44/#46)."""
 import sqlite3
 
-import pytest
 import requests
 
 from tests.conftest import (
     BASE_URL,
-    DATA_DIR,
-    USERS_DIR,
-    unique_user,
-    unique_book_id,
-    register,
-    register_and_login,
     auth_headers,
     make_book,
+    register,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
-# The integration server runs against an isolated throwaway DB (issue #46),
-# pointed at by DATABASE_URL in conftest.py. Assertions read that same file, so
-# they never touch the developer's data/app.db.
-TEST_DB = DATA_DIR / "test_app.db"
+# The server/database machinery (including TEST_DB and USERS_DIR) lives in the
+# integration-only conftest, so import those from there.
+from tests.integration.conftest import TEST_DB, USERS_DIR
+
+# The integration server uses an isolated throwaway DB (issue #46); assertions read that same file, never data/app.db.
 
 
 def _query(db_path, sql, params=()):
@@ -99,11 +90,7 @@ class TestBookPersistence:
 
 
 class TestTestDatabaseIsolation:
-    """
-    Issue #46: integration tests run against a SEPARATE test database
-    (data/test_app.db via DATABASE_URL), so they never pollute the developer's
-    data/app.db. conftest.py sets DATABASE_URL and builds the schema there.
-    """
+    """Issue #46: integration tests use a separate test DB (data/test_app.db via DATABASE_URL), never the developer's data/app.db."""
 
     def test_integration_server_uses_isolated_test_database(self):
         assert TEST_DB.exists(), (

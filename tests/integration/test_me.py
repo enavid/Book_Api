@@ -1,25 +1,13 @@
-"""
-Integration tests for GET /me (new endpoint).
-
-/me returns the profile of the currently authenticated user so the UI can show
-who is logged in and how many books they own. Response shape (200):
-
-    {"username": "<caller>", "book_count": <int>}
-
-These tests talk to the live server started by tests/conftest.py over plain
-HTTP (requests). They contain no filesystem paths and no subprocess calls, so
-they behave identically on Windows and Linux.
-
-NOTE (TDD): these tests are expected to FAIL until GET /me is implemented.
-"""
+"""Integration tests for GET /me. TDD: red until implemented."""
 import requests
+
 from tests.conftest import (
     BASE_URL,
-    unique_user,
-    unique_book_id,
-    register_and_login,
     auth_headers,
     make_book,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
 

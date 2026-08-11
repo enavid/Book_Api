@@ -1,30 +1,18 @@
-"""
-One-off migration of the legacy JSON data into the database (issue #45).
-
-Reads:
-    data/Users/*.json        -> users table
-    data/Book_Loader.json    -> books table
-
-Runs inside app.app_context() so db.session is usable outside any request.
-Idempotent: running it again does not create duplicate rows.
-
-Usage:
-    python scripts/import_json_to_db.py
-"""
+"""One-off, idempotent migration of the legacy JSON files into the database (issue #45)."""
+import json
 import sys
 from pathlib import Path
-import json
 
-# Running "python scripts/import_json_to_db.py" puts scripts/ (not the project
-# root) on sys.path, so `import main` would fail. Add the project root first.
+# Put the project root on sys.path so "import main" works when run as a script.
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
 
 import bcrypt
 
-from main import app
 from app.extensions import db
-from app.models import User, Book
+from app.models import Book, User
+from main import app
+
 USERS_DIR = BASE_DIR / "data" / "Users"
 BOOKS_FILE = BASE_DIR / "data" / "Book_Loader.json"
 
@@ -48,8 +36,7 @@ def import_users():
             continue
 
         password = data.get("password", "")
-        # Keep an already-hashed password as-is; hash a plaintext one so login
-        # (which uses bcrypt.checkpw) keeps working.
+        # Keep an already-hashed password as-is; hash a plaintext one so bcrypt login keeps working.
         if not _looks_hashed(password):
             password = bcrypt.hashpw(
                 password.encode("utf-8"), bcrypt.gensalt(12)
@@ -67,8 +54,7 @@ def import_books():
     with open(BOOKS_FILE, encoding="utf-8") as f:
         raw = json.load(f)
 
-    # Book_Loader.json is a dict keyed by book_id ({"1": {...}}); older exports
-    # may be a plain list. Handle both.
+    # Book_Loader.json is a dict keyed by book_id; older exports may be a list. Handle both.
     books = raw.values() if isinstance(raw, dict) else raw
 
     for data in books:

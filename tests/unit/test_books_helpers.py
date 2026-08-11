@@ -1,14 +1,6 @@
-"""
-Unit tests for the helper functions in app/books.py:
-  - error_response  (uniform error shape, issue #20)
-  - is_owner        (ownership check contract, issues #21 / #33)
-
-These test the functions directly, with no HTTP server. `error_response`
-uses `jsonify`, so it needs a Flask application context — provided by the
-`app_ctx` fixture below.
-"""
-import sys
+"""Unit tests for app/books.py helpers: error_response and is_owner (no HTTP server)."""
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
@@ -45,12 +37,7 @@ class TestErrorResponse:
 
 
 class TestIsOwner:
-    """
-    is_owner takes a book ENTRY (a dict) and checks its 'added_by' field:
-    `book_entry.get('added_by') == username`. It never indexes the module
-    dict itself, so it cannot crash on a missing id — that keeps update_book
-    and delete_book able to return a clean 403/404 (issues #21 / #33).
-    """
+    """is_owner checks a book dict's 'added_by' against a username via .get(), so it never crashes on a missing key (issues #21/#33)."""
 
     ALICE_BOOK = {"book_id": 1, "added_by": "alice"}
     BOB_BOOK = {"book_id": 2, "added_by": "bob"}
@@ -70,7 +57,4 @@ class TestIsOwner:
         assert books.is_owner({"book_id": 3}, "alice") is False
 
 
-# NOTE: the old TestLoadSaveBooks class was removed. It exercised
-# books.BOOKS_FILE / load_books / save_books — the JSON file-storage layer that
-# the database migration (issues #37–#46) intentionally deleted. Persistence is
-# now covered by tests/integration/test_database.py against the real DB.
+# NOTE: old TestLoadSaveBooks removed (tested the deleted JSON file-storage layer); persistence now covered by test_database.py.
