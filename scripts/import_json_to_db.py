@@ -11,9 +11,9 @@ Idempotent: running it again does not create duplicate rows.
 Usage:
     python scripts/import_json_to_db.py
 """
+import json
 import sys
 from pathlib import Path
-import json
 
 # Running "python scripts/import_json_to_db.py" puts scripts/ (not the project
 # root) on sys.path, so `import main` would fail. Add the project root first.
@@ -22,9 +22,10 @@ sys.path.insert(0, str(BASE_DIR))
 
 import bcrypt
 
-from main import app
 from app.extensions import db
-from app.models import User, Book
+from app.models import Book, User
+from main import app
+
 USERS_DIR = BASE_DIR / "data" / "Users"
 BOOKS_FILE = BASE_DIR / "data" / "Book_Loader.json"
 

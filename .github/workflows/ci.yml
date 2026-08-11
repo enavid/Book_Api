@@ -1,0 +1,80 @@
+name: CI
+
+# A step-by-step pipeline. The three stages run in order and each one gates the
+# next via `needs:`, so you get the cheapest feedback first:
+#
+#     lint  ->  unit  ->  integration
+#
+# If lint fails, the unit and integration stages are skipped; if unit fails,
+# integration is skipped. This is the same order as `make test`.
+#
+# Every stage runs on BOTH Linux and Windows (matrix), so the project stays
+# provably cross-platform.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  # -------- Stage 1: lint (code style / standards) --------
+  lint:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Ruff lint
+        run: ruff check .
+
+  # -------- Stage 2: unit tests (in-process, no server) --------
+  unit:
+    needs: lint
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Unit tests
+        run: pytest tests/unit/ -v
+
+  # -------- Stage 3: integration tests (spins up a real server) --------
+  integration:
+    needs: unit
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      # The integration server needs a JWT secret of at least 32 chars.
+      JWT_SECRET_KEY: ci-integration-secret-key-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Integration tests
+        run: pytest tests/integration/ -v --tb=short

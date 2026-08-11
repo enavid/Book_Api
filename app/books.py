@@ -1,11 +1,13 @@
-from flask import Blueprint, request, jsonify
-from datetime import datetime
-from app.check_data import check_data,check_data_nl
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from pathlib import Path
 import logging
-from app.models import User, Book
+from datetime import datetime
+from pathlib import Path
+
+from flask import Blueprint, jsonify, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
+
+from app.check_data import check_data, check_data_nl
 from app.extensions import db
+from app.models import Book, User
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +27,6 @@ dir_name = Path(__file__).resolve().parent.parent
 books_bp = Blueprint('books', __name__)
 
 
-@books_bp.route('/get_all_book?page=<int>&per_page=<int>', methods=['GET'])
-@jwt_required()
 @books_bp.route('/get_all_book', methods=['GET'])
 @jwt_required()
 def get_all_book():
@@ -113,7 +113,6 @@ def delete_book(book_id):
 @jwt_required()
 def search():
     data = request.get_json()
-    show = []
     required = [('book_name',str),('genre',str),('writer',str)]
     if check_data_nl(data,required):
         pass

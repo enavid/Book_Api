@@ -8,25 +8,25 @@ the SQLite database file directly to confirm rows really landed in the tables.
 """
 import sqlite3
 
-import pytest
 import requests
 
 from tests.conftest import (
     BASE_URL,
-    DATA_DIR,
-    USERS_DIR,
-    unique_user,
-    unique_book_id,
-    register,
-    register_and_login,
     auth_headers,
     make_book,
+    register,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
+
+# The server/database machinery (including TEST_DB and USERS_DIR) lives in the
+# integration-only conftest, so import those from there.
+from tests.integration.conftest import TEST_DB, USERS_DIR
 
 # The integration server runs against an isolated throwaway DB (issue #46),
 # pointed at by DATABASE_URL in conftest.py. Assertions read that same file, so
 # they never touch the developer's data/app.db.
-TEST_DB = DATA_DIR / "test_app.db"
 
 
 def _query(db_path, sql, params=()):

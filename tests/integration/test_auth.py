@@ -1,6 +1,6 @@
-import pytest
 import requests
-from tests.conftest import BASE_URL, unique_user, register, login, register_and_login, auth_headers
+
+from tests.conftest import BASE_URL, auth_headers, login, register, register_and_login, unique_user
 
 
 class TestSignup:

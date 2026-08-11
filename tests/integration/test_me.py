@@ -13,13 +13,14 @@ they behave identically on Windows and Linux.
 NOTE (TDD): these tests are expected to FAIL until GET /me is implemented.
 """
 import requests
+
 from tests.conftest import (
     BASE_URL,
-    unique_user,
-    unique_book_id,
-    register_and_login,
     auth_headers,
     make_book,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
 

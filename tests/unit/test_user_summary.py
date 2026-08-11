@@ -17,7 +17,7 @@ Contract the model must satisfy (app/models.py, class User):
 
 NOTE (TDD): expected to FAIL until User.summary() exists.
 """
-from app.models import User, Book
+from app.models import Book, User
 
 
 def _book(owner, book_id):

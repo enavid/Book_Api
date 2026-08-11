@@ -1,15 +1,14 @@
-from flask import Flask
-from app import books
-from app import auth
-from flask_jwt_extended import JWTManager
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
-from app.check_data import check_data, check_data_nl
-from app.extensions import db
-from flask_migrate import Migrate
-from app import models
+from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
+
+from app import auth, books
+from app.extensions import db
 
 # Load variables from a local .env file (next to this file) into the
 # environment. This lets JWT_SECRET_KEY (and any other config) be set once in
@@ -53,6 +52,18 @@ app.config['JWT_SECRET_KEY'] = secret
 CORS(app)
 app.register_blueprint(books_bp)
 app.register_blueprint(auth_bp)
+
+# API documentation: serve the OpenAPI spec at /openapi.json and the interactive
+# Swagger UI at /docs. The Swagger UI static assets ship with flask-swagger-ui,
+# so the docs page works fully offline (no CDN needed).
+from flask_swagger_ui import get_swaggerui_blueprint
+
+from app.openapi import API_URL, SWAGGER_URL, openapi_bp
+
+app.register_blueprint(openapi_bp)
+app.register_blueprint(
+    get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': 'Book API'})
+)
 if __name__ == '__main__':
     # The auto-reloader spawns a second process that actually holds the port.
     # For the test harness (and any scripted run) that makes a clean shutdown

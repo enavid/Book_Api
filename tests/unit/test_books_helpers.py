@@ -7,8 +7,8 @@ These test the functions directly, with no HTTP server. `error_response`
 uses `jsonify`, so it needs a Flask application context — provided by the
 `app_ctx` fixture below.
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 

@@ -14,7 +14,7 @@ import pytest
 from sqlalchemy.exc import IntegrityError
 
 from app.extensions import db
-from app.models import User, Book
+from app.models import Book, User
 
 
 def _make_user(username="aliceuser"):

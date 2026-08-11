@@ -18,8 +18,8 @@ Contract the endpoint code must satisfy:
 
 NOTE (TDD): expected to FAIL until pagination_meta() exists in app/books.py.
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 

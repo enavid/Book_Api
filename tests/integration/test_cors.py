@@ -12,7 +12,8 @@ HTTP-only -> identical behaviour on Windows and Linux.
 NOTE (TDD): expected to FAIL until Flask-CORS is installed and enabled.
 """
 import requests
-from tests.conftest import BASE_URL, unique_user, register_and_login, auth_headers
+
+from tests.conftest import BASE_URL, auth_headers, register_and_login, unique_user
 
 
 class TestCorsHeaders:

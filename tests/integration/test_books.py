@@ -6,15 +6,15 @@ These tests exist specifically to expose those bugs.
 """
 from datetime import datetime
 
-import pytest
 import requests
+
 from tests.conftest import (
     BASE_URL,
-    unique_user,
-    unique_book_id,
-    register_and_login,
     auth_headers,
     make_book,
+    register_and_login,
+    unique_book_id,
+    unique_user,
 )
 
 

@@ -23,8 +23,8 @@ from pathlib import Path
 import pytest
 from flask import Flask
 
-from app.extensions import db
 from app import models  # noqa: F401  (import registers User/Book on db.metadata)
+from app.extensions import db
 
 
 @pytest.fixture

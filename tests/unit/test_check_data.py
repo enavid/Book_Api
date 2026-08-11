@@ -4,14 +4,12 @@ Unit tests for check_data and check_data_nl.
 This is an example of how to write unit tests for this project.
 A unit test isolates a single function and tests it directly — no server, no HTTP.
 """
-import sys
 import os
+import sys
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
-import pytest
 from app.check_data import check_data, check_data_nl
-
 
 REQUIRED_FIELDS = [("name", str), ("age", int), ("active", bool)]
 

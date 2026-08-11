@@ -16,8 +16,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
-
 PROJECT_DIR = Path(__file__).resolve().parent.parent.parent
 JWT = "infra-test-secret-key-very-long-and-secure-000"
 

@@ -1,0 +1,42 @@
+# Ruff configuration (linter + import sorter) for the Book API.
+#
+# Ruff is a single, fast, cross-platform tool (pure-Python wheel, works the same
+# on Windows/macOS/Linux). It replaces the classic flake8 + isort combo.
+#
+# The rule set is deliberately practical for a learning project: catch real
+# problems (unused imports, undefined names, obvious bugs, bad import order,
+# basic style) without drowning the code in strict-but-subjective warnings.
+
+line-length = 120
+# The code uses PEP 701 nested-quote f-strings (Python 3.12+), and the project
+# runs on 3.12+, so target 3.12 here.
+target-version = "py312"
+
+# Auto-generated / third-party code we do not lint.
+extend-exclude = [
+    "venv",
+    ".venv",
+    "migrations",   # Alembic-generated migration scripts
+]
+
+[lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes (unused imports, undefined names, ...)
+    "I",   # isort (import ordering)
+    "B",   # flake8-bugbear (likely bugs)
+]
+ignore = [
+    "E402",  # module-level import not at top of file (main.py imports blueprints after app setup)
+    "E741",  # ambiguous variable name (not worth enforcing here)
+    "B008",  # function call in default argument (Flask/pytest patterns use it)
+]
+
+# Tests may re-import fixtures and use assert-heavy patterns; keep them sane.
+[lint.per-file-ignores]
+"tests/*" = ["F811", "E501"]
+# openapi.py is a data file: the OpenAPI spec is one big nested dict literal,
+# where a few deeply-nested lines exceed the limit but wrapping them would hurt
+# readability more than it helps.
+"app/openapi.py" = ["E501"]
