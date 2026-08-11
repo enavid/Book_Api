@@ -219,3 +219,10 @@ def my_books():
         meta['per_page'] = 0
         return jsonify({'book': [], 'pagination': meta}), 200
     return jsonify({'book': [b.to_dict() for b in pagination.items], 'pagination': meta}), 200
+@books_bp.route('/genres', methods=['GET'])
+@jwt_required()
+def genres():
+    rows = db.session.scalars(
+        db.select(Book.genre).distinct().order_by(Book.genre)
+    ).all()
+    return jsonify({'genres': rows}), 200
