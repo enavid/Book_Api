@@ -16,7 +16,15 @@ SORT_COLUMNS = {
     "published_year": Book.published_year,
     "book_name": Book.book_name,
 }
-
+def book_stats(books):
+    books = list(books)
+    ratings = [b.rating for b in books]
+    avg = round(sum(ratings) / len(ratings), 2) if ratings else None
+    return {
+        "total_books": len(books),
+        "average_rating": avg,
+        "distinct_genres": len({b.genre for b in books}),
+    }
 def resolve_sort(sort_key):
     return SORT_COLUMNS.get(sort_key, Book.book_id)
 def pagination_meta(pagination):
@@ -226,3 +234,10 @@ def genres():
         db.select(Book.genre).distinct().order_by(Book.genre)
     ).all()
     return jsonify({'genres': rows}), 200
+@books_bp.route('/stats', methods=['GET'])
+@jwt_required()
+def stats():
+    user = db.session.scalar(db.select(User).filter_by(username=get_jwt_identity()))
+    if user is None:
+        return error_response('user not found', 404)
+    return jsonify(book_stats(user.books)), 200
