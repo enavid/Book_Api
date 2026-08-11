@@ -1,9 +1,4 @@
-"""
-Unit tests for check_data and check_data_nl.
-
-This is an example of how to write unit tests for this project.
-A unit test isolates a single function and tests it directly — no server, no HTTP.
-"""
+"""Unit tests for check_data / check_data_nl (field presence and type validation)."""
 import os
 import sys
 
@@ -94,12 +89,7 @@ class TestCheckDataNl:
 
 
 class TestCheckDataEdgeCases:
-    """
-    Extra edge cases for check_data — type coercion, empty/whitespace strings,
-    and non-string values. check_data now checks the type BEFORE calling
-    .strip(), so empty/whitespace strings are rejected and non-string values
-    return False cleanly instead of crashing (issues #24 and #27 fixed).
-    """
+    """Edge cases for check_data: type is checked before .strip(), so empty/whitespace/non-string values are rejected cleanly (issues #24/#27)."""
 
     FIELDS = [("name", str), ("age", int), ("active", bool)]
 
@@ -153,11 +143,7 @@ class TestCheckDataEdgeCases:
 
 
 class TestCheckDataNlEdgeCases:
-    """
-    Extra edge cases for check_data_nl. Unlike check_data, its empty-string
-    guard IS reachable, so it safely rejects empty/whitespace/non-string
-    values without crashing — this is what makes empty-search return 400.
-    """
+    """Edge cases for check_data_nl: its empty-string guard is reachable, so empty/whitespace/non-string values are rejected (empty search -> 400)."""
 
     OPTIONAL = [("book_name", str), ("genre", str), ("writer", str)]
 

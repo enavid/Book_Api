@@ -1,22 +1,4 @@
-"""
-Unit test for User.summary() (used by GET /me).
-
-summary() returns the small dict the /me endpoint sends:
-
-    {"username": <str>, "book_count": <int>}
-
-It is tested directly against an isolated, per-test SQLite database (see
-tests/unit/conftest.py) — no HTTP server, no touching data/app.db. The fixture
-releases and deletes the temp DB file, so it is Windows-safe (Windows locks
-open files; the fixture disposes the engine before deleting).
-
-Contract the model must satisfy (app/models.py, class User):
-
-    def summary(self) -> dict:
-        return {"username": self.username, "book_count": len(self.books)}
-
-NOTE (TDD): expected to FAIL until User.summary() exists.
-"""
+"""Unit test for User.summary() used by GET /me. TDD: red until it exists."""
 from app.models import Book, User
 
 

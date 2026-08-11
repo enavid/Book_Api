@@ -1,28 +1,4 @@
-"""
-Unit test for the resolve_sort() helper in app/books.py (used by the sorting
-feature on GET /get_all_book).
-
-resolve_sort() maps a client-supplied ?sort= value to a real Book column, using
-an allow-list. This matters for security: without an allow-list a client could
-try to sort by an arbitrary attribute. Unknown / missing keys must fall back to
-a safe default (book_id).
-
-Comparing with `is` works because a mapped column attribute (e.g. Book.rating)
-is the same object every time it is accessed on the class.
-
-Contract the endpoint code must satisfy:
-
-    SORT_COLUMNS = {
-        "book_id": Book.book_id,
-        "rating": Book.rating,
-        "published_year": Book.published_year,
-        "book_name": Book.book_name,
-    }
-    def resolve_sort(sort_key):
-        return SORT_COLUMNS.get(sort_key, Book.book_id)
-
-NOTE (TDD): expected to FAIL until resolve_sort() exists in app/books.py.
-"""
+"""Unit test for resolve_sort() in app/books.py, an allow-list mapping ?sort= to a column. TDD: red until it exists."""
 import os
 import sys
 

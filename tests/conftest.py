@@ -1,18 +1,4 @@
-"""
-Shared test helpers for BOTH unit and integration tests.
-
-This module is intentionally lightweight: it holds only pure helper functions
-and constants, and pulls in NO server/database machinery. That machinery lives
-in tests/integration/conftest.py, so pytest loads it only when integration
-tests are collected.
-
-Why this split matters: the Flask-server fixture used to live here as a
-session-scoped autouse fixture, which meant EVERY test run (including a pure
-unit run like `make test-unit`) started the server and ran `flask db upgrade`.
-If that upgrade failed for any reason, all 68 in-process unit tests errored out
-even though they never touch the server. Unit tests now run fully in-process and
-never trigger the server or the database.
-"""
+# Pure test helpers shared by unit and integration tests; the server/DB machinery lives in integration/conftest.py.
 import uuid
 
 import requests

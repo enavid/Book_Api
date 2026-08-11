@@ -1,9 +1,4 @@
-"""
-Integration tests for all book endpoints.
-
-Tests marked with # BUG are expected to FAIL because of known bugs in the code.
-These tests exist specifically to expose those bugs.
-"""
+"""Integration tests for all book endpoints (tests marked # BUG are expected to fail)."""
 from datetime import datetime
 
 import requests
@@ -385,9 +380,7 @@ class TestUpdateBook:
         assert r.status_code == 200
 
     def test_update_does_not_create_duplicate_entries(self):
-        # BUG: Expected to FAIL — update_book stores the updated book with an int key
-        # (book[book_id] where book_id is int from URL) but the original was stored
-        # with a string key. This creates two entries for the same book.
+        # BUG: Expected to FAIL - update_book stores the book under an int key while the original used a string key, creating two entries.
         tokens = register_and_login(unique_user())
         bid = unique_book_id()
         h = auth_headers(tokens["token"])
@@ -606,9 +599,7 @@ class TestSearch:
         assert r.status_code == 400
 
     def test_multi_field_search_still_matches_first_field(self):
-        # Regression guard for issue #26: the field checks are independent
-        # `if`s, not an elif chain, so a match on book_name is not lost just
-        # because a second field is also provided.
+        # Regression guard for issue #26: the field checks are independent ifs (not elif), so a book_name match is not lost when a second field is given.
         tokens = register_and_login(unique_user())
         h = auth_headers(tokens["token"])
         bid = unique_book_id()
@@ -689,12 +680,7 @@ class TestBookLifecycle:
 
 
 class TestErrorContract:
-    """
-    Regression guards for issues #20 and #33: error responses must use a
-    single shape ({"message": ...}) and ownership violations must return the
-    same status code (403) on both delete_book and update_book, while a
-    genuinely missing book returns 404 (never a 500 crash).
-    """
+    """Regression guards for #20/#33: uniform {"message": ...} error shape, 403 on ownership violations, and 404 (not 500) for a missing book."""
 
     def _owned_book(self):
         owner = register_and_login(unique_user())

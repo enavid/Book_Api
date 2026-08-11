@@ -1,19 +1,4 @@
-"""
-Integration tests for GET /genres (new endpoint).
-
-/genres returns the distinct list of genres currently present in the database,
-sorted alphabetically. The UI uses it to populate a "filter by genre" dropdown.
-
-Response shape (200):
-    {"genres": ["Fiction", "Programming", ...]}
-
-The test DB is shared, so these tests assert membership / no-duplicates / sorted
-(never an exact full list).
-
-HTTP-only -> Windows-safe.
-
-NOTE (TDD): expected to FAIL until GET /genres is implemented.
-"""
+"""Integration tests for GET /genres: the distinct, sorted list of genres. TDD: red until implemented."""
 import uuid
 
 import requests

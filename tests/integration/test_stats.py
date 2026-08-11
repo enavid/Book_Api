@@ -1,22 +1,4 @@
-"""
-Integration tests for GET /stats (new endpoint).
-
-Returns a small dashboard summary for the currently authenticated user (their
-own books only). Response shape (200):
-
-    {
-      "total_books": <int>,
-      "average_rating": <float rounded to 2 decimals, or null when no books>,
-      "distinct_genres": <int>
-    }
-
-Each test uses a FRESH user, so their stats depend only on the books that test
-adds (deterministic even though the DB is shared).
-
-HTTP-only -> Windows-safe.
-
-NOTE (TDD): expected to FAIL until GET /stats is implemented.
-"""
+"""Integration tests for GET /stats: per-user total_books, average_rating, distinct_genres. TDD: red until implemented."""
 import requests
 
 from tests.conftest import (

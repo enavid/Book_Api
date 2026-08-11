@@ -1,24 +1,4 @@
-"""
-Integration-only fixtures: spin up a REAL Flask server against an isolated,
-throwaway SQLite database.
-
-Because this conftest lives under tests/integration/, pytest loads it ONLY when
-integration tests are collected. A pure unit run (e.g. `make test-unit`, or
-pytest tests/unit/) never imports this file, so it never starts the server and
-never runs `flask db upgrade` — which is exactly why a broken/absent server
-setup can no longer make the in-process unit tests error out.
-
-Cross-platform / Windows notes (all preserved from the original design):
-* The SQLite URL uses forward slashes via Path.as_posix(): on Windows a raw
-  path has backslashes ("sqlite:///C:\\...") which SQLAlchemy can misparse.
-* The server runs single-process (USE_RELOADER=0) so proc.terminate() reliably
-  stops it on every OS, including Windows, instead of leaving an orphan on 5000.
-* The subprocess uses sys.executable + "-m flask" / "main.py", so it does not
-  depend on a `flask`/`python` entry being on PATH (matters on Windows).
-* Deleting a leftover test DB is wrapped in try/except OSError, because Windows
-  locks open files and raises PermissionError rather than silently allowing the
-  unlink.
-"""
+# Integration-only fixtures: spin up a real Flask server against an isolated test DB; loaded only for integration runs.
 import os
 import subprocess
 import sys
@@ -39,10 +19,7 @@ TEST_JWT_SECRET = "integration-test-secret-key-very-long-and-secure"
 
 
 def _remove_test_db():
-    # Delete a leftover test DB from a previous run. Wrapped in try/except
-    # because on Windows a still-open SQLite file cannot be deleted (raises
-    # PermissionError); swallowing it lets the run continue and the file gets
-    # reused/rebuilt rather than crashing at import time.
+    # Delete a leftover test DB; try/except because Windows locks open files and raises on unlink.
     try:
         if TEST_DB.exists():
             TEST_DB.unlink()
@@ -76,18 +53,12 @@ def flask_server():
         f.unlink()
     env = os.environ.copy()
     env["JWT_SECRET_KEY"] = TEST_JWT_SECRET
-    # Run a single-process server (no auto-reloader child), so terminate()
-    # below reliably stops it on every OS — Windows included — instead of
-    # leaving an orphan holding port 5000.
+    # Single-process server (no reloader child) so terminate() stops it cleanly on every OS, Windows included.
     env["USE_RELOADER"] = "0"
-    # Point the whole stack at an isolated throwaway DB (issue #46) so tests
-    # never touch the developer's data/app.db.
+    # Point the whole stack at an isolated throwaway DB (issue #46) so tests never touch data/app.db.
     env["DATABASE_URL"] = "sqlite:///" + TEST_DB.as_posix()
 
-    # Build the schema in the fresh test DB before the server starts. main.py
-    # does not create tables on its own, so without this the server would come
-    # up against an empty file and every DB write would 500 with "no such
-    # table". `flask db upgrade` runs the migrations (issue #42) into test_app.db.
+    # Build the schema in the fresh test DB before the server starts, else every DB write 500s (issue #42).
     upgrade = subprocess.run(
         [sys.executable, "-m", "flask", "--app", "main", "db", "upgrade"],
         cwd=str(PROJECT_DIR), env=env,

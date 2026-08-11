@@ -1,27 +1,4 @@
-"""
-Unit test for the book_stats() helper in app/books.py (used by GET /stats).
-
-book_stats() takes an iterable of book objects and returns the dashboard dict:
-    {"total_books", "average_rating", "distinct_genres"}
-
-It only reads .rating and .genre, so we feed it lightweight stand-ins
-(types.SimpleNamespace) instead of real ORM rows -> fast, no DB, no server,
-OS-independent.
-
-Contract the endpoint code must satisfy:
-
-    def book_stats(books):
-        books = list(books)
-        ratings = [b.rating for b in books]
-        avg = round(sum(ratings) / len(ratings), 2) if ratings else None
-        return {
-            "total_books": len(books),
-            "average_rating": avg,
-            "distinct_genres": len({b.genre for b in books}),
-        }
-
-NOTE (TDD): expected to FAIL until book_stats() exists in app/books.py.
-"""
+"""Unit test for book_stats() in app/books.py. TDD: red until it exists."""
 import os
 import sys
 

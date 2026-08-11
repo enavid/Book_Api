@@ -1,21 +1,4 @@
-"""
-Integration tests for filtering & sorting on GET /get_all_book.
-
-New query params (all optional, combine with AND, and keep pagination):
-    genre=<str>       only books whose genre matches (case-insensitive, exact)
-    writer=<str>      only books whose writer matches (case-insensitive, exact)
-    min_rating=<int>  only books with rating >= min_rating
-    sort=<field>      one of: book_id | rating | published_year | book_name
-    order=asc|desc    default asc
-
-Because /get_all_book returns EVERY user's books and all tests share one DB,
-each test tags its books with a unique random genre/writer so its assertions are
-deterministic (only its own rows match the filter).
-
-HTTP-only -> Windows-safe.
-
-NOTE (TDD): expected to FAIL until filtering/sorting is implemented.
-"""
+"""Integration tests for filtering & sorting on GET /get_all_book (genre, writer, min_rating, sort, order). TDD: red until implemented."""
 import uuid
 
 import requests

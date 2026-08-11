@@ -1,23 +1,4 @@
-"""
-Unit test for the pagination_meta() helper in app/books.py.
-
-The helper turns a Flask-SQLAlchemy Pagination object into the small dict the
-API returns under the "pagination" key. It only READS attributes, so we feed it
-a lightweight stand-in (types.SimpleNamespace) instead of hitting a real
-database — this keeps the test fast, server-free, and OS-independent.
-
-Contract the endpoint code must satisfy:
-
-    def pagination_meta(pagination):
-        return {
-            "page": pagination.page,
-            "per_page": pagination.per_page,
-            "total": pagination.total,
-            "total_pages": pagination.pages,
-        }
-
-NOTE (TDD): expected to FAIL until pagination_meta() exists in app/books.py.
-"""
+"""Unit test for pagination_meta() in app/books.py. TDD: red until it exists."""
 import os
 import sys
 

@@ -1,13 +1,4 @@
-"""
-Unit tests for the SQLAlchemy models in app/models.py (issues #41 / #39).
-
-They exercise the ORM layer directly against an isolated per-test SQLite
-database (see tests/unit/conftest.py) — no HTTP server involved. Together they
-prove the database *mechanism itself* works: rows persist, the one-to-many
-User<->Book relationship is wired, cascade delete cleans up, the unique-username
-constraint holds, and to_dict() reproduces the exact API shape the endpoints and
-the existing integration tests depend on.
-"""
+"""Unit tests for the SQLAlchemy models (User/Book) against an isolated per-test SQLite DB."""
 from datetime import date
 
 import pytest

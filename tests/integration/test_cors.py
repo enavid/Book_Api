@@ -1,16 +1,4 @@
-"""
-Integration tests for CORS support.
-
-A separate front-end (e.g. a React SPA served from another origin such as
-http://localhost:5173) cannot call this API from the browser unless the server
-sends CORS headers. After Flask-CORS is enabled, every response must carry an
-Access-Control-Allow-Origin header, and a pre-flight OPTIONS request must
-succeed.
-
-HTTP-only -> identical behaviour on Windows and Linux.
-
-NOTE (TDD): expected to FAIL until Flask-CORS is installed and enabled.
-"""
+"""Integration tests for CORS headers and the preflight OPTIONS request. TDD: red until Flask-CORS is enabled."""
 import requests
 
 from tests.conftest import BASE_URL, auth_headers, register_and_login, unique_user

@@ -1,19 +1,4 @@
-"""
-Integration tests for POST /change_password (new endpoint).
-
-Lets an authenticated user change their password. Body:
-    {"old_password": "...", "new_password": "..."}
-
-Rules:
-- Requires a valid access token.
-- The old password must match the stored hash, otherwise the change is rejected
-  and the password stays the same.
-- On success the new password logs in and the old one no longer does.
-
-HTTP-only -> Windows-safe.
-
-NOTE (TDD): expected to FAIL until POST /change_password is implemented.
-"""
+"""Integration tests for POST /change_password. TDD: red until implemented."""
 import requests
 
 from tests.conftest import (

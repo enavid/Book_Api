@@ -1,11 +1,4 @@
-"""
-Integration tests for the API documentation (Swagger / OpenAPI).
-
-Verifies that GET /openapi.json serves a valid OpenAPI 3 spec listing every
-implemented endpoint, and that GET /docs serves the interactive Swagger UI.
-
-HTTP-only -> Windows-safe.
-"""
+"""Integration tests for the API docs: GET /openapi.json (valid OpenAPI 3) and GET /docs (Swagger UI)."""
 import requests
 
 from tests.conftest import BASE_URL

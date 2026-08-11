@@ -1,15 +1,4 @@
-"""
-OpenAPI 3.0 specification + Swagger UI wiring for the Book API.
-
-This documents every endpoint that is currently implemented. It is served two
-ways:
-  * GET /openapi.json  -> the machine-readable spec (this module's `spec` dict)
-  * GET /docs          -> the interactive Swagger UI (from flask-swagger-ui)
-
-The spec is a plain Python dict on purpose: it is easy to read, needs no extra
-build step, and keeps all API documentation in one place instead of scattered
-across view docstrings.
-"""
+"""OpenAPI 3.0 spec (served at /openapi.json) and Swagger UI wiring (at /docs) for the Book API."""
 from flask import Blueprint, jsonify
 
 SWAGGER_URL = "/docs"          # where the interactive UI is mounted

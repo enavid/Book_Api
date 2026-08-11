@@ -1,9 +1,4 @@
-"""
-Unit tests for the token helpers in app/auth.py (make_token / make_refresh_token).
-
-These need a Flask app configured with a JWT secret and a JWTManager, but no
-HTTP server — the tokens are created and decoded entirely in-process.
-"""
+"""Unit tests for the token helpers in app/auth.py (make_token / make_refresh_token), no HTTP server."""
 import os
 import sys
 
