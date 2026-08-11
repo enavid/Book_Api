@@ -90,3 +90,23 @@ def me():
     if user is None:
         return error_response('user not found', 404)
     return jsonify(user.summary()), 200
+@auth_bp.route('/change_password', methods=['POST'])
+@jwt_required()
+def change_password():
+    data = request.get_json()
+    required = [('old_password', str), ('new_password', str)]
+    if not check_data(data, required):
+        return error_response('data is bad!', 400)
+
+    user = db.session.scalar(db.select(User).filter_by(username=get_jwt_identity()))
+    if user is None:
+        return error_response('user not found', 404)
+
+    if not bcrypt.checkpw(data['old_password'].encode('utf-8'), user.password.encode('utf-8')):
+        return error_response('old password is incorrect', 403)
+
+    user.password = bcrypt.hashpw(
+        data['new_password'].encode('utf-8'), bcrypt.gensalt(12)
+    ).decode('utf-8')
+    db.session.commit()
+    return jsonify({'message': 'success'}), 200
