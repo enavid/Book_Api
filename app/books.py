@@ -10,7 +10,15 @@ from app.extensions import db
 from app.models import Book, User
 
 logger = logging.getLogger(__name__)
+SORT_COLUMNS = {
+    "book_id": Book.book_id,
+    "rating": Book.rating,
+    "published_year": Book.published_year,
+    "book_name": Book.book_name,
+}
 
+def resolve_sort(sort_key):
+    return SORT_COLUMNS.get(sort_key, Book.book_id)
 def pagination_meta(pagination):
     return {
         "page": pagination.page,
@@ -34,16 +42,30 @@ def get_all_book():
     per_page = max(request.args.get('per_page', 10, type=int), 0)
 
     query = db.select(Book)
+
+    genre = request.args.get('genre')
+    if genre:
+        query = query.filter(Book.genre.ilike(genre))
+
+    writer = request.args.get('writer')
+    if writer:
+        query = query.filter(Book.writer.ilike(writer))
+
+    min_rating = request.args.get('min_rating', type=int)
+    if min_rating is not None:
+        query = query.filter(Book.rating >= min_rating)
+
+    column = resolve_sort(request.args.get('sort'))
+    if request.args.get('order') == 'desc':
+        column = column.desc()
+    query = query.order_by(column)
+
     pagination = db.paginate(query, page=page, per_page=per_page or 1, error_out=False)
     meta = pagination_meta(pagination)
-
     if per_page == 0:
         meta['per_page'] = 0
         return jsonify({'book': [], 'pagination': meta}), 200
-
-    return jsonify(
-        {'book': [b.to_dict() for b in pagination.items], 'pagination': meta}
-    ), 200
+    return jsonify({'book': [b.to_dict() for b in pagination.items], 'pagination': meta}), 200
 @books_bp.route('/add_book', methods=['POST'])
 @jwt_required()
 def add_book():
