@@ -13,11 +13,14 @@ concurrency:
 permissions:
   contents: read
 
+# The app is deployed as a Linux Docker container, so CI runs only on Linux and
+# pins the same Python version the image will use. There is no Windows job: the
+# runtime target is the container, not a developer's OS.
 env:
   PYTHON_VERSION: "3.12"
 
 jobs:
-  # Stage 1: lint. Fast, OS-independent, so it runs once.
+  # Stage 1: lint.
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +32,7 @@ jobs:
       - run: pip install -r requirements.txt
       - run: ruff check .
 
-  # Stage 2: unit tests. In-process, no server, so one runner is enough.
+  # Stage 2: unit tests (in-process, no server).
   unit:
     needs: lint
     runs-on: ubuntu-latest
@@ -42,15 +45,10 @@ jobs:
       - run: pip install -r requirements.txt
       - run: pytest tests/unit -v
 
-  # Stage 3: integration tests. These spin up a real server, so they run on both
-  # Linux and Windows to prove the project is cross-platform.
+  # Stage 3: integration tests (spin up a real server).
   integration:
     needs: unit
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     env:
       JWT_SECRET_KEY: ci-integration-secret-key-at-least-32-characters
     steps:
