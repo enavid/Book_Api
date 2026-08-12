@@ -11,4 +11,5 @@ psycopg[binary]>=3.1
 flask-cors
 flask-swagger-ui
 ruff
+gunicorn
 
